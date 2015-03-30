@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/behance/nbd.php-validation.svg?branch=master)](https://travis-ci.org/behance/nbd.php-validation)
 
+[![Dependency Status](https://www.versioneye.com/user/projects/5501eae54a10643473000581/badge.svg?style=flat)](https://www.versioneye.com/user/projects/5501eae54a10643473000581)
+
 NBD.php - Validation Component
 ==============================
 
