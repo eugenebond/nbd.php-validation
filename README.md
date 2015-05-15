@@ -91,6 +91,7 @@ else {
 * alphaNumeric
 * array
 * email
+* phone
 * decimal
 * float
 * hexColor
