@@ -4,6 +4,14 @@
     "license": "MIT",
     "authors": [
         {
+            "name": "Jim DeLois",
+            "email": "delois@adobe.com"
+        },
+        {
+            "name": "Matt LeBrun",
+            "email": "lebrun@adobe.com"
+        },
+        {
             "name": "Bryan Latten",
             "email": "latten@adobe.com"
         }
