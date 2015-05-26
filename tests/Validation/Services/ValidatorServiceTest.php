@@ -301,6 +301,39 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
 
   /**
+   * @return array
+   */
+  public function specialRulesProvider() {
+
+    return [
+        'required nullable, where key doesn’t exist'                           => [ 'expected' => false, 'rules' => 'required|nullable|Integer', 'data' => [ 'nope' => 1 ] ],
+        'required nullable, where key exists but value is set to empty string' => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => '' ] ],
+        'required nullable, where key exists but value is set to null'         => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => null ] ],
+        'required nullable, where key is set to truth-y'                       => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => 1 ] ],
+        'optional nullable, where key doesn’t exist'                           => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'nope' => 1 ] ],
+        'optional nullable, where key exists but value is set to empty string' => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => '' ] ],
+        'optional nullable, where key exists but value is set to null'         => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => null ] ],
+        'optional nullable, where key is set to truth-y'                       => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => 1 ] ],
+    ];
+
+  } // specialRulesProvider
+
+
+  /**
+   * @test
+   * @dataProvider specialRulesProvider
+   */
+  public function specialRules( $expected, $rules, $data ) {
+
+    $validator = new ValidatorService( $data );
+    $validator->setRule( 'id', 'User ID', $rules );
+
+    $this->assertEquals( $expected, $validator->run() );
+
+  } // specialRules
+
+
+  /**
    * @test
    */
   public function isFieldRequiredFalse() {
