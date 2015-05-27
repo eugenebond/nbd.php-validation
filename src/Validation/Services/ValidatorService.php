@@ -106,9 +106,9 @@ class ValidatorService implements ValidatorServiceInterface {
    */
   public function setRule( $key, $fieldname, $rules ) {
 
-    $rules          = ( is_array( $rules ) )
-                      ? $rules
-                      : array_filter( explode( '|', $rules ) );
+    $rules = ( is_array( $rules ) )
+             ? $rules
+             : array_filter( explode( '|', $rules ) );
 
     if ( empty( $rules ) ) {
       throw new RuleRequirementException( 'No validation rules specified' );
