@@ -106,16 +106,19 @@ class ValidatorService implements ValidatorServiceInterface {
    */
   public function setRule( $key, $fieldname, $rules ) {
 
-    $special = $this->_getSpecialRules();
-    $rules   = ( is_array( $rules ) )
-               ? $rules
-               : explode( '|', $rules );
+    $rules          = ( is_array( $rules ) )
+                      ? $rules
+                      : array_filter( explode( '|', $rules ) );
 
-    // IMPORTANT: simply having 'required' and/or 'nullable' is not sufficient for a validator ruleset
-    if ( count( $rules ) === 1 && in_array( $rules[0], $special ) ) {
-      throw new RuleRequirementException( "A valid ruleset for '{$key}' must more than just '{$rules[0]}'" );
-    } elseif ( count( $rules ) === 2 && $rules == $special ) {
-      throw new RuleRequirementException( "A valid ruleset for '{$key}' must more than just 'required' and 'nullable'" );
+    if ( empty( $rules ) ) {
+      throw new RuleRequirementException( 'No validation rules specified' );
+    }
+
+    $filtered_fules = $this->_filterSpecialRules( $rules );
+
+    // IMPORTANT: simply having special rules, such as 'required' or 'nullable', is not sufficient for a validator ruleset
+    if ( empty( $filtered_fules ) ) {
+      throw new RuleRequirementException( sprintf( 'A valid ruleset for "%s" must be more than just special rules ("%s")', $key, join( '", "', $this->_getSpecialRules() ) ) );
     }
 
     $this->_rules[ $key ]       = $rules;
@@ -486,6 +489,8 @@ class ValidatorService implements ValidatorServiceInterface {
 
   /**
    * Checks for a failure in an individual key
+   *
+   * @param string  $key  field name
    */
   public function isFieldFailed( $key ) {
 
@@ -730,11 +735,11 @@ class ValidatorService implements ValidatorServiceInterface {
 
 
   /**
-   * Removes special rules from a fields list of rules so they can be handled separately.
+   * Removes special rules from a field's list of rules so they can be handled separately.
    *
-   * @param  array  $rules  all of a fields validator rules
+   * @param  string[]  $rules  all of a fields validator rules
    *
-   * @return array
+   * @return string[]
    */
   protected function _filterSpecialRules( array $rules ) {
 
@@ -788,6 +793,11 @@ class ValidatorService implements ValidatorServiceInterface {
 
   } // _buildTemplateRule
 
+  /**
+   * Returns list of special rules.
+   *
+   * @return string[]
+   */
   protected function _getSpecialRules() {
 
     return $this->_special_rules;

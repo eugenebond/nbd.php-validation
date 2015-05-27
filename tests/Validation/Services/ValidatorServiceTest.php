@@ -43,6 +43,19 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
   /**
    * @test
+   * @expectedException  Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
+   */
+  public function setRuleEmptyRules() {
+
+    $test = new ValidatorService();
+
+    $test->setRule( 'email', 'E-Mail', '' );
+
+  } // setRuleEmptyRules
+
+
+  /**
+   * @test
    */
   public function setGetRule() {
 
@@ -388,7 +401,7 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
     $key       = 'email';
     $message   = 'a message goes here';
 
-    $validator->setRule( $key, '', '' )
+    $validator->setRule( $key, 'id', 'Integer' )
               ->addFieldFailure( $key, $message );
 
     $this->assertEquals( [ $key ], $validator->getFailedFields() );
@@ -416,7 +429,7 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
     $validator = new ValidatorService();
     $key       = 'email';
     $message   = 'a message goes here';
-    $rules[]   = [ 'email', '', '' ];
+    $rules[]   = [ 'email', 'id', 'Integer' ];
 
     $validator->setRules( $rules )
               ->addFieldFailure( $key, $message );
@@ -435,7 +448,7 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
     $key       = 'email';
     $message   = 'a message goes here';
 
-    $validator->setRule( $key, '', '' )
+    $validator->setRule( $key, 'id', 'Integer' )
               ->addFieldFailure( $key, $message );
 
     $this->assertTrue( $validator->isFieldFailed( $key ) );
