@@ -106,13 +106,16 @@ class ValidatorService implements ValidatorServiceInterface {
    */
   public function setRule( $key, $fieldname, $rules ) {
 
-    $rules = ( is_array( $rules ) )
-             ? $rules
-             : explode( '|', $rules );
+    $special = $this->_getSpecialRules();
+    $rules   = ( is_array( $rules ) )
+               ? $rules
+               : explode( '|', $rules );
 
-    // IMPORTANT: simply having 'required' is not sufficient for a validator ruleset
-    if ( count( $rules ) === 1 && $rules[0] === self::RULE_REQUIRED ) {
-      throw new RuleRequirementException( "A valid ruleset for '{$key}' must more than just 'required'" );
+    // IMPORTANT: simply having 'required' and/or 'nullable' is not sufficient for a validator ruleset
+    if ( count( $rules ) === 1 && in_array( $rules[0], $special ) ) {
+      throw new RuleRequirementException( "A valid ruleset for '{$key}' must more than just '{$rules[0]}'" );
+    } elseif ( count( $rules ) === 2 && $rules == $special ) {
+      throw new RuleRequirementException( "A valid ruleset for '{$key}' must more than just 'required' and 'nullable'" );
     }
 
     $this->_rules[ $key ]       = $rules;

@@ -35,7 +35,7 @@ $validator = new ValidatorService();
 $validator->setRule( 'email',      'E-Mail',          'required|email' )
           ->setRule( 'first_name', 'First Name',      'required|alpha' )
           ->setRule( 'last_name',  'Last Name',       'required|alpha' )
-          ->setRule( 'middle_i',   'Middle Initial',  'alpha|maxLength[1]' );
+          ->setRule( 'middle_i',   'Middle Initial',  'alpha|nullable|maxLength[1]' );
 
 // Insert data to be validated
 $validator->setCageData( $_POST );
@@ -127,6 +127,31 @@ Parameters are defined comma-separated inside brackets after rule:
 <tr><td>filter</td><td>filter[trim,md5]</td><td>1+</td><td>applies transformation of input, evaluating left to right, transformation is seen by subsequent rules and subsequent retrieval. Parameter can be any single-parameter defined function that returns a transformed result. In example, will trim(), then md5() input, which would be coded as md5( trim( $input ) );</td></tr>
 
 </table>
+
+
+#####Other Special rules:
+
+
+<table>
+<tr><th>Rule</th><th>Explanation</th></tr>
+<tr><td>required</td><td>The required rule checks if a field was passed into the validator. It does *not* validate the fields value and if it is empty or not.</td></tr>
+<tr><td>nullable</td><td>The nullable rule allows empty data to be passed to simulate clearing out a fields data. It accepts an empty string or `NULL` as valid input.</td></tr>
+</table>
+
+######Examples
+
+<table>
+  <tr><th>Case</th><th>Valid</th></tr>
+  <tr><td>required nullable, where key doesn’t exist</td><td>false</td></tr>
+  <tr><td>required nullable, where key exists but value is set to empty string/null</td><td>true</td></tr>
+  <tr><td>required nullable, where key is truth-y</td><td>true</td></tr>
+  <tr><td>optional nullable, where key doesn’t exist</td><td>true</td></tr>
+  <tr><td>optional nullable, where key exists but value is set to empty string/null</td><td>true</td></tr>
+  <tr><td>optional nullable, where key is truth-y</td><td>true</td></tr>
+</table>
+
+* "valid" cases still depend on the rest of the rule set
+* special rules cannot be used exclusive together or by themselves, they must be accompanied by other rules.
 
 
 #####Add custom named validators quickly and easily:

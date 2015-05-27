@@ -309,11 +309,11 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
         'required nullable, where key doesn’t exist'                           => [ 'expected' => false, 'rules' => 'required|nullable|Integer', 'data' => [ 'nope' => 1 ] ],
         'required nullable, where key exists but value is set to empty string' => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => '' ] ],
         'required nullable, where key exists but value is set to null'         => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => null ] ],
-        'required nullable, where key is set to truth-y'                       => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => 1 ] ],
+        'required nullable, where key is truth-y'                              => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => 1 ] ],
         'optional nullable, where key doesn’t exist'                           => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'nope' => 1 ] ],
         'optional nullable, where key exists but value is set to empty string' => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => '' ] ],
         'optional nullable, where key exists but value is set to null'         => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => null ] ],
-        'optional nullable, where key is set to truth-y'                       => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => 1 ] ],
+        'optional nullable, where key is truth-y'                              => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => 1 ] ],
     ];
 
   } // specialRulesProvider
@@ -599,17 +599,32 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
 
   /**
+   * @return array
+   */
+  public function runOnlySpecialErrorProvider() {
+
+    return [
+        'only required'              => [ 'rules' => 'required' ],
+        'only nullable'              => [ 'rules' => 'nullable' ],
+        'both required and nullable' => [ 'rules' => 'required|nullable' ],
+    ];
+
+  } // runOnlySpecialErrorProvider
+
+
+  /**
    * @test
+   * @dataProvider runOnlySpecialErrorProvider
    * @expectedException  Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
    */
-  public function runOnlyRequiredError() {
+  public function runOnlySpecialError( $rules ) {
 
     $test = new ValidatorService();
 
-    $test->setRule( 'email', 'E-Mail', 'required' );
+    $test->setRule( 'email', 'E-Mail', $rules );
     $test->run();
 
-  } // runOnlyRequiredError
+  } // runOnlySpecialError
 
 
   /**
