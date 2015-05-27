@@ -3,12 +3,14 @@
 namespace Behance\NBD\Validation\Abstracts;
 
 use Behance\NBD\Validation\Interfaces\RuleInterface;
+use Behance\NBD\Validation\Interfaces\ValidatorServiceInterface;
 use Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException;
 
 abstract class RuleAbstract implements RuleInterface {
 
   // Names the key within context array where rule parameters are passed
   const KEY_CONTEXT_PARAMETERS = 'parameters';
+  const KEY_CONTEXT_VALIDATOR  = 'validator';
 
   // When defined, mandates how many parameters must be present to return from context parameters
   const REQUIRED_PARAM_COUNT   = false;
@@ -58,11 +60,10 @@ abstract class RuleAbstract implements RuleInterface {
    * When a REQUIRED_PARAM_COUNT constant is defined, requires that many
    * items from context parameters and returns them to the caller
    *
-   * @throws RuleRequirementException
-   *
    * @param array $context
    *
    * @return array
+   * @throws \Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
    */
   protected function _extractContextParameters( array $context ) {
 
@@ -80,5 +81,25 @@ abstract class RuleAbstract implements RuleInterface {
     return $context[ $key ];
 
   } // _extractContextParameters
+
+  /**
+   * Extracts a Validator from a given array context
+   *
+   * @param array $context
+   *
+   * @return \Behance\NBD\Validation\Interfaces\ValidatorServiceInterface
+   * @throws \Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
+   */
+  protected function _extractContextValidator( array $context ) {
+
+    $key = static::KEY_CONTEXT_VALIDATOR;
+
+    if ( empty( $context[ $key ] ) || !( $context[ $key ] instanceof ValidatorServiceInterface ) ) {
+      throw new RuleRequirementException( "Validator required for '" . get_class( $this ) . "'" );
+    }
+
+    return $context[ $key ];
+
+  } // _extractContextValidator
 
 } // RuleAbstract

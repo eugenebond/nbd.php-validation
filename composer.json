@@ -4,6 +4,10 @@
     "license": "MIT",
     "authors": [
         {
+            "name": "Mark Dunphy",
+            "email": "dunphy@adobe.com"
+        },
+        {
             "name": "Jim DeLois",
             "email": "delois@adobe.com"
         },
