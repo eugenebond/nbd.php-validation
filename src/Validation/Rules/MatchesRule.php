@@ -25,7 +25,7 @@ class MatchesRule extends CallbackRuleAbstract {
 
       list( $other_field_key ) = $this->_extractContextParameters( $context );
 
-      $other_field = $this->_getValidatorFromContext( $context )->getCageDataValue( $other_field_key );
+      $other_field = $this->_extractContextValidator( $context )->getCageDataValue( $other_field_key );
 
       if ( $data === null || $other_field === null ) {
         return false;
@@ -48,26 +48,10 @@ class MatchesRule extends CallbackRuleAbstract {
     list( $other_field_key ) = $this->_extractContextParameters( $context );
 
     // Insert 'otherfield' into context array
-    $context['otherfield'] = $this->_getValidatorFromContext( $context )->getFieldname( $other_field_key );
+    $context['otherfield'] = $this->_extractContextValidator( $context )->getFieldname( $other_field_key );
 
     return $context;
 
   } // convertFormattingContext
-
-
-  /**
-   * @param array $context
-   *
-   * @return Behance\NBD\Validator\Interfaces\ValidatorServiceInterface
-   */
-  private function _getValidatorFromContext( array $context ) {
-
-    if ( empty( $context['validator'] ) || !( $context['validator'] instanceof ValidatorServiceInterface ) ) {
-      throw new RuleRequirementException( "Validator required as context for '" . __CLASS__ . "'" );
-    }
-
-    return $context['validator'];
-
-  } // _getValidatorFromContext
 
 } // MatchesRule
