@@ -343,6 +343,13 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
     $this->assertEquals( $expected, $validator->run() );
 
+    if ( $expected && !isset( $data['nope'] ) ) {
+      $this->assertEquals( $data, $validator->getValidatedData() );
+    }
+    else {
+      $this->assertEmpty( $validator->getValidatedData() );
+    }
+
   } // specialRules
 
 
