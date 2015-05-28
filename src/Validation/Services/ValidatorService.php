@@ -19,6 +19,7 @@ class ValidatorService implements ValidatorServiceInterface {
 
   // Define special-case rules that need to be dealt with differently than standard ones
   const RULE_REQUIRED      = 'required';
+  const RULE_NULLABLE      = 'nullable';
   const RULE_MATCHES       = 'matches';
   const RULE_FILTER        = 'filter'; // Will modify raw input as it moves through this validation step
 
@@ -31,6 +32,11 @@ class ValidatorService implements ValidatorServiceInterface {
             $_delimiter    = ', ';
 
   protected $_rules_provider;
+
+  private $_special_rules = [
+      self::RULE_REQUIRED,
+      self::RULE_NULLABLE,
+  ];
 
 
   /**
@@ -102,11 +108,17 @@ class ValidatorService implements ValidatorServiceInterface {
 
     $rules = ( is_array( $rules ) )
              ? $rules
-             : explode( '|', $rules );
+             : array_filter( explode( '|', $rules ) );
 
-    // IMPORTANT: simply having 'required' is not sufficient for a validator ruleset
-    if ( count( $rules ) === 1 && $rules[0] === self::RULE_REQUIRED ) {
-      throw new RuleRequirementException( "A valid ruleset for '{$key}' must more than just 'required'" );
+    if ( empty( $rules ) ) {
+      throw new RuleRequirementException( 'No validation rules specified' );
+    }
+
+    $filtered_fules = $this->_filterSpecialRules( $rules );
+
+    // IMPORTANT: simply having special rules, such as 'required' or 'nullable', is not sufficient for a validator ruleset
+    if ( empty( $filtered_fules ) ) {
+      throw new RuleRequirementException( sprintf( 'A valid ruleset for "%s" must be more than just special rules ("%s")', $key, join( '", "', $this->_getSpecialRules() ) ) );
     }
 
     $this->_rules[ $key ]       = $rules;
@@ -242,6 +254,22 @@ class ValidatorService implements ValidatorServiceInterface {
 
 
   /**
+   * Convenience function to check if $key has been defined as nullable or not.
+   *
+   * @param string $key
+   *
+   * @return bool
+   */
+  public function isFieldNullable( $key ) {
+
+    $rules = $this->getFieldRules( $key );
+
+    return in_array( self::RULE_NULLABLE, $rules );
+
+  } // isFieldNullable
+
+
+  /**
    * Execute all validators on $this->_cage_data using setRule(s)
    *
    * @throws NotRunException           when no validators have previously been set
@@ -265,18 +293,19 @@ class ValidatorService implements ValidatorServiceInterface {
 
       $field_failed = false; // Flag this true to end validating field
       $raw_data     = $this->getCageDataValue( $field );
+      $rules        = $this->_filterSpecialRules( $rules );
 
       // Define default context to be passed to called rules
-      $context = [
+      $context      = [
           'field'     => $field,
           'validator' => $this
       ];
 
-      if ( $raw_data === null ) {
+      if ( !array_key_exists( $field, $this->_cage_data ) ) {
 
         // Special Case: stop processing when data is completely missing, involve required rule
 
-        if ( in_array( self::RULE_REQUIRED, $rules ) ) {
+        if ( $this->isFieldRequired( $field ) ) {
 
           $required_rule = $rules_provider->getRule( self::RULE_REQUIRED );
 
@@ -289,6 +318,18 @@ class ValidatorService implements ValidatorServiceInterface {
 
       } // if raw_data
 
+
+      // Special Case: stop processing when data is nullable and a designated "null" value is passed
+
+      if ( $this->isFieldNullable( $field ) ) {
+
+        $nullable_rule = $rules_provider->getRule( self::RULE_NULLABLE );
+
+        if ( $nullable_rule->isValid( $raw_data ) ) {
+          continue;
+        }
+
+      } // if in_array required
 
 
       // Each rule for the specified field
@@ -448,6 +489,8 @@ class ValidatorService implements ValidatorServiceInterface {
 
   /**
    * Checks for a failure in an individual key
+   *
+   * @param string  $key  field name
    */
   public function isFieldFailed( $key ) {
 
@@ -692,6 +735,24 @@ class ValidatorService implements ValidatorServiceInterface {
 
 
   /**
+   * Removes special rules from a field's list of rules so they can be handled separately.
+   *
+   * @param  string[]  $rules  all of a fields validator rules
+   *
+   * @return string[]
+   */
+  protected function _filterSpecialRules( array $rules ) {
+
+    $special = $this->_getSpecialRules();
+
+    return array_filter( $rules, function( $rule ) use ( $special ) {
+      return ( !in_array( $rule, $special ) );
+    } );
+
+  } // _extractSpecialRules
+
+
+  /**
    * Provides backwards compatibility for existing callback rules
    *
    * @param Closure $rule
@@ -731,5 +792,16 @@ class ValidatorService implements ValidatorServiceInterface {
     return new CallbackTemplateRule();
 
   } // _buildTemplateRule
+
+  /**
+   * Returns list of special rules.
+   *
+   * @return string[]
+   */
+  protected function _getSpecialRules() {
+
+    return $this->_special_rules;
+
+  } // _getSpecialRules
 
 } // ValidatorService

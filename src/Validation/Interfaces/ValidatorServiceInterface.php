@@ -94,6 +94,16 @@ interface ValidatorServiceInterface {
 
 
   /**
+   * Convenience function to check if $key has been defined as nullable or not.
+   *
+   * @param string $key
+   *
+   * @return bool
+   */
+  public function isFieldNullable( $key );
+
+
+  /**
    * Execute all validators on $this->_cage_data using setRule(s)
    *
    * @throws NotRunException           when no validators have previously been set

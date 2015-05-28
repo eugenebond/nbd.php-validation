@@ -43,6 +43,19 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
   /**
    * @test
+   * @expectedException  Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
+   */
+  public function setRuleEmptyRules() {
+
+    $test = new ValidatorService();
+
+    $test->setRule( 'email', 'E-Mail', '' );
+
+  } // setRuleEmptyRules
+
+
+  /**
+   * @test
    */
   public function setGetRule() {
 
@@ -301,6 +314,39 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
 
   /**
+   * @return array
+   */
+  public function specialRulesProvider() {
+
+    return [
+        'required nullable, where key doesn’t exist'                           => [ 'expected' => false, 'rules' => 'required|nullable|Integer', 'data' => [ 'nope' => 1 ] ],
+        'required nullable, where key exists but value is set to empty string' => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => '' ] ],
+        'required nullable, where key exists but value is set to null'         => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => null ] ],
+        'required nullable, where key is truth-y'                              => [ 'expected' => true,  'rules' => 'required|nullable|Integer', 'data' => [ 'id'   => 1 ] ],
+        'optional nullable, where key doesn’t exist'                           => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'nope' => 1 ] ],
+        'optional nullable, where key exists but value is set to empty string' => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => '' ] ],
+        'optional nullable, where key exists but value is set to null'         => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => null ] ],
+        'optional nullable, where key is truth-y'                              => [ 'expected' => true,  'rules' => 'nullable|Integer',          'data' => [ 'id'   => 1 ] ],
+    ];
+
+  } // specialRulesProvider
+
+
+  /**
+   * @test
+   * @dataProvider specialRulesProvider
+   */
+  public function specialRules( $expected, $rules, $data ) {
+
+    $validator = new ValidatorService( $data );
+    $validator->setRule( 'id', 'User ID', $rules );
+
+    $this->assertEquals( $expected, $validator->run() );
+
+  } // specialRules
+
+
+  /**
    * @test
    */
   public function isFieldRequiredFalse() {
@@ -355,7 +401,7 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
     $key       = 'email';
     $message   = 'a message goes here';
 
-    $validator->setRule( $key, '', '' )
+    $validator->setRule( $key, 'id', 'Integer' )
               ->addFieldFailure( $key, $message );
 
     $this->assertEquals( [ $key ], $validator->getFailedFields() );
@@ -383,7 +429,7 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
     $validator = new ValidatorService();
     $key       = 'email';
     $message   = 'a message goes here';
-    $rules[]   = [ 'email', '', '' ];
+    $rules[]   = [ 'email', 'id', 'Integer' ];
 
     $validator->setRules( $rules )
               ->addFieldFailure( $key, $message );
@@ -402,7 +448,7 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
     $key       = 'email';
     $message   = 'a message goes here';
 
-    $validator->setRule( $key, '', '' )
+    $validator->setRule( $key, 'id', 'Integer' )
               ->addFieldFailure( $key, $message );
 
     $this->assertTrue( $validator->isFieldFailed( $key ) );
@@ -566,17 +612,32 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
 
   /**
+   * @return array
+   */
+  public function runOnlySpecialErrorProvider() {
+
+    return [
+        'only required'              => [ 'rules' => 'required' ],
+        'only nullable'              => [ 'rules' => 'nullable' ],
+        'both required and nullable' => [ 'rules' => 'required|nullable' ],
+    ];
+
+  } // runOnlySpecialErrorProvider
+
+
+  /**
    * @test
+   * @dataProvider runOnlySpecialErrorProvider
    * @expectedException  Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
    */
-  public function runOnlyRequiredError() {
+  public function runOnlySpecialError( $rules ) {
 
     $test = new ValidatorService();
 
-    $test->setRule( 'email', 'E-Mail', 'required' );
+    $test->setRule( 'email', 'E-Mail', $rules );
     $test->run();
 
-  } // runOnlyRequiredError
+  } // runOnlySpecialError
 
 
   /**
