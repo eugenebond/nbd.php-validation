@@ -326,6 +326,7 @@ class ValidatorService implements ValidatorServiceInterface {
         $nullable_rule = $rules_provider->getRule( self::RULE_NULLABLE );
 
         if ( $nullable_rule->isValid( $raw_data ) ) {
+          $this->_valid_data[ $field ] = $raw_data;
           continue;
         }
 
