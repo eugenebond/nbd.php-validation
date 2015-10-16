@@ -32,6 +32,7 @@ class UrlRuleTest extends \PHPUnit_Framework_TestCase {
         [ 'http://www.google.com', true ],
         [ 'https://www.google.com', true ],
         [ 'www.google.com?a=1&b=2#fun', true ],
+        [ 'www.behance.net/job/Multimedia-Designer%2C-Senior', true ], // testing "%2C"
         [ '//www.google.com', false ],
         [ '//www.google.co.uk', false ],
         [ 'www.google.com?b=2|3', false ],
