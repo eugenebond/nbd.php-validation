@@ -90,14 +90,15 @@ else {
 * alpha
 * alphaNumeric
 * array
-* email
-* phone
 * decimal
+* email
 * float
 * hexColor
 * integer
 * json
 * notEmpty
+* phone
+* string
 * url
 
 
