@@ -125,7 +125,7 @@ Parameters are defined comma-separated inside brackets after rule:
 <table>
 <tr><th>Rule</th><th>Usage</th><th>Params</th><th>Explanation</th></tr>
 
-<tr><td>filter</td><td>filter[trim,md5]</td><td>1+</td><td>applies transformation of input, evaluating left to right, transformation is seen by subsequent rules and subsequent retrieval. Parameter can be any single-parameter defined function that returns a transformed result. In example, will trim(), then md5() input, which would be coded as md5( trim( $input ) );</td></tr>
+<tr><td>filter</td><td>filter[trim,md5]</td><td>1+</td><td>applies transformation of input, evaluating arguments left to right, transformation is seen by subsequent rules and subsequent retrieval. Parameter can be any single-parameter defined function that returns a transformed result. For example, using `filter[trim,md5]` will trim(), then md5() input, which would be coded as md5( trim( $input ) ). Placement of filter within validation rule is significant, as entire validation rule is also evaluated left to right. (e.g: calling `filter[trim]` before `notEmpty` will trim the input before checking if not empty). </td></tr>
 
 </table>
 
