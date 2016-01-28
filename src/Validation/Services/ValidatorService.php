@@ -84,7 +84,7 @@ class ValidatorService implements ValidatorServiceInterface {
   /**
    * @param string $key  retrieve unfiltered data associated by $key
    *
-   * @return mixed|null  null when non-existant in caged data
+   * @return mixed|null  null when non-existent in caged data
    */
   public function getCageDataValue( $key ) {
 
@@ -97,6 +97,8 @@ class ValidatorService implements ValidatorServiceInterface {
 
   /**
    * Set validation rules for a field.
+   *
+   * @throws \Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
    *
    * @param string $key        index where to expect data to validate
    * @param string $fieldname  readable name for this data field
@@ -133,7 +135,7 @@ class ValidatorService implements ValidatorServiceInterface {
    * Convenience function to set validation rules for multiple fields at the same time
    * @throws InvalidRuleException  when not enough elements are available in each rule grouping
    *
-   * @param array $rule_groups
+   * @param  array $rule_groups
    *
    * @return $this  fluent interface
    */
@@ -161,8 +163,10 @@ class ValidatorService implements ValidatorServiceInterface {
   /**
    * Programmatically add another rule to an EXISTING set
    *
-   * @param string $key
-   * @param string $rule
+   * @throws InvalidRuleException
+   *
+   * @param  string $key
+   * @param  string $rule
    *
    * @return $this  fluent interface
    */
@@ -432,7 +436,7 @@ class ValidatorService implements ValidatorServiceInterface {
    * Produces a single string of failures to be returned to client
    *
    * @param string $field      which error to locate
-   * @param string $delimiter  optionally override preset
+   * @param array  $context
    *
    * @return string  as fieldname is not
    */
@@ -449,6 +453,47 @@ class ValidatorService implements ValidatorServiceInterface {
            : $error;
 
   } // getFieldErrorMessage
+
+
+  /**
+   * Provides the unprocessed template
+   *
+   * @param  string  $field
+   *
+   * @return string
+   */
+  public function getFieldErrorTemplate( $field ) {
+
+    if ( !isset( $this->_errors[ $field ] ) ) {
+      return '';
+    }
+
+    $error = $this->_errors[ $field ];
+
+    return ( $error instanceof ErrorFormatter )
+           ? $error->getRule()->getErrorTemplate()
+           : $error;
+
+  } // getFieldErrorTemplate
+
+
+  /**
+   * Builds an array of field failures with their raw error templates
+   *
+   * @return string[]  each error template, keyed by failing field
+   */
+  public function getAllFieldErrorTemplates() {
+
+    $fields = $this->getFailedFields();
+    $templates = [];
+
+    foreach ( $fields as $field ) {
+      $templates[ $field ] = $this->getFieldErrorTemplate( $field );
+    }
+
+    return $templates;
+
+  } // getAllFieldErrorTemplates
 
 
   /**
@@ -491,7 +536,9 @@ class ValidatorService implements ValidatorServiceInterface {
   /**
    * Checks for a failure in an individual key
    *
-   * @param string  $key  field name
+   * @param  string   $key  field name
+   *
+   * @return boolean
    */
   public function isFieldFailed( $key ) {
 
@@ -523,7 +570,7 @@ class ValidatorService implements ValidatorServiceInterface {
 
 
   /**
-   * @param RulesProviderInterface $rules
+   * @param  \Behance\NBD\Validation\Interfaces\RulesProviderInterface  $rules_provider
    */
   public function setRulesProvider( RulesProviderInterface $rules_provider ) {
 
@@ -573,9 +620,12 @@ class ValidatorService implements ValidatorServiceInterface {
 
 
   /**
-   * @throws InvalidRuleException  when attempting to grab keys where rules have not been set
+   * @throws \Behance\NBD\Validation\Exceptions\Validator\InvalidRuleException  when attempting to grab keys where rules have not been set
+   * @throws \Behance\NBD\Validation\Exceptions\Validator\NotRunException
    *
-   * @param mixed|null $key  null when not available
+   * @param  mixed|null $field  null when not available
+   *
+   * @return string|null
    */
   public function getValidatedField( $field ) {
 
@@ -660,9 +710,9 @@ class ValidatorService implements ValidatorServiceInterface {
    * Associates an error with $field for failing $rule
    * Disassociates data from $field, preventing accidental retrieval
    *
-   * @param string $field    which field to add an error to
-   * @param Behance\NBD\Interfaces\RuleInterface $rule  which rule $field failed on
-   * @param array  $context  same variables passed during validation phase, when available
+   * @param string                                            $field    which field to add an error to
+   * @param \Behance\NBD\Validation\Interfaces\RuleInterface  $rule     which rule $field failed on
+   * @param array                                             $context  same variables passed during validation phase, when available
    */
   protected function _addError( $field, RuleInterface $rule, array $context = [] ) {
 
@@ -691,8 +741,10 @@ class ValidatorService implements ValidatorServiceInterface {
 
 
   /**
-   * @param mixed  $rule
-   * @param string $field  what is currently being processed
+   * @throws \Behance\NBD\Validation\Exceptions\Validator\RuleRequirementException
+   *
+   * @param  mixed  $rule
+   * @param  string $field  what is currently being processed
    *
    * @return array [ 0 => function name/Closure, 1 => optional array of parameters ]
    */
@@ -756,7 +808,7 @@ class ValidatorService implements ValidatorServiceInterface {
   /**
    * Provides backwards compatibility for existing callback rules
    *
-   * @param Closure $rule
+   * @param \Closure $rule
    *
    * @return string
    */
@@ -776,7 +828,7 @@ class ValidatorService implements ValidatorServiceInterface {
    * @param RuleInterface $rule
    * @param array         $context
    *
-   * @return Behance\NBD\Validator\Formatters\ErrorFormatter
+   * @return \Behance\NBD\Validation\Formatters\ErrorFormatter
    */
   protected function _buildErrorFormatter( RuleInterface $rule, array $context ) {
 
@@ -786,7 +838,7 @@ class ValidatorService implements ValidatorServiceInterface {
 
 
   /**
-   * @return Behance\NBD\Validation\Rules\Templates\CallbackTemplateRule
+   * @return \Behance\NBD\Validation\Rules\Templates\CallbackTemplateRule
    */
   protected function _buildTemplateRule() {
 

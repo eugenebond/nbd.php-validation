@@ -7,7 +7,7 @@ interface ValidatorServiceInterface {
   /**
    * Key-value pair of data to validate
    *
-   * @param array $data
+   * @param array $key
    */
   public function setCageData( array $key );
 
@@ -21,7 +21,7 @@ interface ValidatorServiceInterface {
   /**
    * @param string $key  retrieve unfiltered data associated by $key
    *
-   * @return mixed|null  null when non-existant in caged data
+   * @return mixed|null  null when non-existent in caged data
    */
   public function getCageDataValue( $key );
 
@@ -181,13 +181,13 @@ interface ValidatorServiceInterface {
 
 
   /**
-   * @param RulesProviderInterface $rules
+   * @param \Behance\NBD\Validation\Interfaces\RulesProviderInterface  $rules_provider
    */
   public function setRulesProvider( RulesProviderInterface $rules_provider );
 
 
   /**
-   * @return RulesProviderInterface $rules
+   * @return \Behance\NBD\Validation\Interfaces\RulesProviderInterface
    */
   public function getRulesProvider();
 
