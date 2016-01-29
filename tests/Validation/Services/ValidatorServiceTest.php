@@ -564,6 +564,72 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
 
   } // getErrorsByKey
 
+  /**
+   * @test
+   */
+  public function getFieldErrorTemplate() {
+
+    $validator = new ValidatorService();
+    $key       = 'email';
+    $name      = 'E-Mail';
+
+    $message   = '%fieldname% was not good enough';
+    $expected  = '%fieldname% was not good enough';
+
+    $validator->setRule( $key, $name, 'required|email' )
+      ->addFieldFailure( $key, $message );
+
+    $this->assertEquals( $expected, $validator->getFieldErrorTemplate( $key ) );
+
+  } // getFieldErrorTemplate
+
+  /**
+   * @test
+   */
+  public function getFieldErrorTemplateFieldNotSet() {
+
+    $key       = 'abc';
+    $value     = 'def';
+    $validator = new ValidatorService( [ $key => $value ] );
+    $validator->setRule( $key, 'ABC', "required|stringContains[{$value}]" );
+
+    $this->assertTrue( $validator->runStrict() );
+
+    $this->assertEquals( '', $validator->getFieldErrorTemplate( $key ) );
+
+  } // getFieldErrorTemplateFieldNotSet
+
+  /**
+   * @test
+   */
+  public function getAllFieldErrorTemplates() {
+
+    $bad_key  = 'bad_comment';
+    $good_key = 'comment';
+    $data     = [
+        $bad_key  => '<alert>The number 3</alert>',
+        $good_key => '<h1>Here is a valid-enough comment</h1>'
+    ];
+
+    $validator = new ValidatorService( $data );
+
+    $validator->setRule( $bad_key,  'Bad comment',  'required|integer' )
+              ->setRule( $good_key, 'Good Comment', 'required|maxLength[800]' );
+
+    $this->assertFalse( $validator->run() );
+    $this->assertTrue( $validator->isFieldFailed( $bad_key ) );
+    $this->assertFalse( $validator->isFieldFailed( $good_key ) );
+
+    $templates     = $validator->getAllFieldErrorTemplates();
+    $failed_fields = $validator->getFailedFields();
+
+    $this->assertArrayHasKey( $bad_key, $templates );
+    $this->assertContains( $bad_key, $failed_fields );
+
+    $this->assertArrayNotHasKey( $good_key, $templates );
+    $this->assertArrayNotHasKey( $good_key, $failed_fields );
+
+  } // getAllFieldErrorTemplates
 
   /**
    * @test
