@@ -27,10 +27,17 @@ class ValidatorService implements ValidatorServiceInterface {
             $_cage_data    = [],    // Pre-tested, unvalidated data
             $_valid_data   = [],    // Post-tested, approved data
             $_field_names  = [],    // list of rules to their readable names
-            $_errors       = [],    // Key => Message for an errors encountered
             $_run_complete = false,
             $_delimiter    = ', ';
 
+  /**
+   * @var \Behance\NBD\Validation\Formatters\ErrorFormatter[]
+   */
+  protected $_errors       = [];
+
+  /**
+   * @var \Behance\NBD\Validation\Providers\RulesProvider
+   */
   protected $_rules_provider;
 
   private $_special_rules = [
@@ -448,9 +455,7 @@ class ValidatorService implements ValidatorServiceInterface {
 
     $error = $this->_errors[ $field ];
 
-    return ( $error instanceof ErrorFormatter )
-           ? $error->render( $context )
-           : $error;
+    return $error->render( $context );
 
   } // getFieldErrorMessage
 
@@ -470,9 +475,7 @@ class ValidatorService implements ValidatorServiceInterface {
 
     $error = $this->_errors[ $field ];
 
-    return ( $error instanceof ErrorFormatter )
-           ? $error->getRule()->getErrorTemplate()
-           : $error;
+    return $error->getRule()->getErrorTemplate();
 
   } // getFieldErrorTemplate
 
@@ -494,6 +497,22 @@ class ValidatorService implements ValidatorServiceInterface {
     return $templates;
 
   } // getAllFieldErrorTemplates
+
+
+  /**
+   * @param  string  $field
+   *
+   * @return string
+   */
+  public function getFieldErrorContext( $field ) {
+
+    if ( !isset( $this->_errors[ $field ] ) ) {
+      return '';
+    }
+
+    return $this->_errors[ $field ]->getContext();
+
+  } // getFieldErrorContext
 
 
   /**

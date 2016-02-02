@@ -602,6 +602,45 @@ class NBD_Validation_Services_ValidatorServiceTest extends PHPUnit_Framework_Tes
   /**
    * @test
    */
+  public function getFieldErrorContextNotSet() {
+
+    $key       = 'abc';
+    $value     = 'def';
+    $validator = new ValidatorService( [ $key => $value ] );
+    $validator->setRule( $key, 'ABC', "required|stringContains[{$value}]" );
+
+    $this->assertTrue( $validator->runStrict() );
+
+    $this->assertEquals( '', $validator->getFieldErrorContext( $key ) );
+
+  } // getFieldErrorContextNotSet
+
+
+  /**
+   * @test
+   */
+  public function getFieldErrorContext() {
+
+    $key       = 'abc';
+    $value     = 123;
+
+    $validator = new ValidatorService( [ $key => $value ] );
+
+    $validator->setRule( $key, 'ABC', "required|stringContains[{$value}]" );
+
+    $validator->run();
+
+    $result = $validator->getFieldErrorContext( $key );
+
+    $this->assertContains( $key, $result );
+    $this->assertSame( 'stringContains', $result['rule_name'] );
+    $this->assertContains( $value, $result['parameters'] );
+
+  } // getFieldErrorContext
+
+  /**
+   * @test
+   */
   public function getAllFieldErrorTemplates() {
 
     $bad_key  = 'bad_comment';

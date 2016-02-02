@@ -57,6 +57,9 @@ if ( !$valid ) {
   
   // Retrieves the unrendered error templates for all failed fields
   $error_message = $validator->getAllFieldErrorTemplates();
+  
+  // Retrieves the context for a given field error
+  $error_context = $validator->getFieldErrorContext( $field );
 
   // Just retrieve the error message for email field
   $email_message = $validator->getFieldErrorMessage( 'email' );
