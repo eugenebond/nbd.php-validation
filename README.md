@@ -100,6 +100,7 @@ else {
 * email
 * float
 * hexColor
+* postitiveInteger
 * integer
 * json
 * notEmpty
